@@ -321,7 +321,7 @@ body::before {
 .db-node-sub {
   margin-top: 0.375rem;
   color: var(--db-muted);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   line-height: 1.35;
 }
 .db-node-pin {
@@ -522,7 +522,7 @@ body::before {
 .db-trace li {
   padding: 0.125rem 0.4375rem;
   border: 1px solid var(--db-hairline);
-  font: 400 0.8125rem/1.5 var(--db-font-mono);
+  font: 400 0.875rem/1.5 var(--db-font-mono);
   color: var(--db-muted);
 }
 .db-trace li[data-active="true"] {
@@ -572,6 +572,12 @@ body::before {
 .db-sheet ul,
 .db-sheet ol {
   padding-left: 1.5rem;
+}
+.db-sheet ul {
+  list-style: disc;
+}
+.db-sheet ol {
+  list-style: decimal;
 }
 .db-sheet li {
   margin: 0.25rem 0;

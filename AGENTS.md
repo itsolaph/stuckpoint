@@ -31,3 +31,22 @@ Use `adding-a-feature` for functional parity and `frontend-design` for a user-fa
 Before building common workspace or agent UI, read `agent-native-toolkit`; for supported customization, read `customizing-agent-native`.
 
 - Guarded verification: run `pnpm agent-native:doctor`; fix findings before done.
+
+## Deadbolt (escape-room playtester)
+
+Routes: `/home` room list, `/rooms/<roomId>` canvas, `/rooms/<roomId>/sheet` GM sheet, `/chat`. Navigation adds `roomId`; the selected node is in tab state `selection`.
+
+- The walker (`run-playtest`) is the only proof a room is solvable. Never claim solvable, winnable or deadlock-free unless the latest run for that room is `escaped` and not stale (a guard checks the DB and blocks the claim).
+- Report a rejection (`invalid_container`, `invalid_requirement`, `not_found`) verbatim and fix the input; never retry blindly.
+- `containerId` is a lock id; `requires` lists item, clue or lock ids. Cycles are allowed: finding them is the product.
+
+| Action | Use |
+|---|---|
+| view-screen | open room, selected node, latest playtest |
+| list-rooms, get-room | read |
+| create-room, create-nodes, create-node | build; prefer one create-nodes with refs |
+| update-node, move-node, delete-node | edit; update-node returns `previous` for undo |
+| run-playtest | verdict, trace, blocking chains |
+| save-hint-ladder | exactly 3 hints: nudge, direction, answer |
+| save-gm-sheet | markdown, or omit it to generate |
+| load-sample-room | seance, darkroom, supply-closet |

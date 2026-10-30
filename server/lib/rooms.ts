@@ -26,22 +26,14 @@ export function requireUser(ctx: ActionCtx | undefined): {
 /** Check the caller's access to a room and return its row. Children inherit this check. */
 export async function loadRoom(roomId: string, role: "viewer" | "editor" | "admin") {
   try {
-    await assertAccess("room", roomId, role);
+    const access = await assertAccess("room", roomId, role);
+    return access.resource as typeof schema.rooms.$inferSelect;
   } catch (err) {
     if (err instanceof ForbiddenError) {
       fail("Room not found.", { errorCode: "not_found", statusCode: 404 });
     }
     throw err;
   }
-  const [room] = await getDb()
-    .select()
-    .from(schema.rooms)
-    .where(eq(schema.rooms.id, roomId))
-    .limit(1);
-  if (!room) {
-    fail("Room not found.", { errorCode: "not_found", statusCode: 404 });
-  }
-  return room;
 }
 
 export async function listNodeRows(roomId: string): Promise<NodeRow[]> {
