@@ -49,9 +49,10 @@ describe("playtest", () => {
     expect(r.verdict).toBe("stuck");
     expect(r.trace).toEqual([]);
     const exit = r.stuckAnalysis.find((e) => e.nodeId === "exit")!;
-    expect(exit.chains[0].text).toContain("The exit needs the brass key");
-    expect(exit.chains[0].text).toContain("the brass key is inside the safe");
-    expect(exit.chains[0].cycle).toEqual(["key", "box", "key"]);
+    const first = exit.chains[0]!;
+    expect(first.text).toContain("The exit needs the brass key");
+    expect(first.text).toContain("the brass key is inside the safe");
+    expect(first.cycle).toEqual(["key", "box", "key"]);
     expect(r.pinNodeIds).toEqual(["key", "box"]);
     expect(r.unreachable.sort()).toEqual(["box", "key"]);
   });
@@ -66,7 +67,7 @@ describe("playtest", () => {
     ];
     const r = playtest(nodes);
     expect(r.verdict).toBe("stuck");
-    const chain = r.stuckAnalysis[0].chains[0];
+    const chain = r.stuckAnalysis[0]!.chains[0]!;
     expect(chain.text).toBe(
       "The exit needs the brass key · the brass key is inside the safe · the safe needs the code clue · " +
         "the code clue requires the UV flashlight · the UV flashlight is inside the safe (unopened)" +
@@ -89,8 +90,8 @@ describe("playtest", () => {
     expect(r.verdict).toBe("stuck");
     expect(r.trace.map((t) => t.nodeId)).toEqual(["fuse", "lockA"]);
     const b = r.stuckAnalysis.find((e) => e.nodeId === "lockB")!;
-    expect(b.chains[0].endsWith).toBe("consumed");
-    expect(b.chains[0].text).toBe(
+    expect(b.chains[0]!.endsWith).toBe("consumed");
+    expect(b.chains[0]!.text).toBe(
       "The panel B needs the fuse (already used up on the panel A)",
     );
   });
@@ -147,7 +148,7 @@ describe("playtest", () => {
       node("l", "lock", { requires: ["l"] }),
     ]);
     expect(r.verdict).toBe("stuck");
-    expect(r.stuckAnalysis[0].chains[0].cycle).toEqual(["l", "l"]);
+    expect(r.stuckAnalysis[0]!.chains[0]!.cycle).toEqual(["l", "l"]);
   });
 });
 

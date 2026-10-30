@@ -9,7 +9,7 @@ const MAX_DEPTH = 40;
 /** "Brass key" -> "the brass key", "UV flashlight" -> "the UV flashlight". */
 function ref(node: EngineNode): string {
   const n = node.name.trim() || node.kind;
-  const lowered = /^[A-Z][a-z]/.test(n) ? n[0].toLowerCase() + n.slice(1) : n;
+  const lowered = /^[A-Z][a-z]/.test(n) ? n.charAt(0).toLowerCase() + n.slice(1) : n;
   return `the ${lowered}`;
 }
 
@@ -22,7 +22,7 @@ function stateOf(node: EngineNode, spent: boolean): string {
 }
 
 function sentenceCase(s: string): string {
-  return s.length > 0 ? s[0].toUpperCase() + s.slice(1) : s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 interface Edge {

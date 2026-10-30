@@ -69,7 +69,7 @@ export function buildGmSheet(input: {
     const optional = result.optional.includes(node.id) ? " _(optional)_" : "";
     n += 1;
     lines.push(`${n}. ${describeStep(step.action, node, byId)}${optional}`);
-    if (step.action !== "exit") stages[stages.length - 1].push(node.name);
+    if (step.action !== "exit") stages[stages.length - 1]?.push(node.name);
     if (step.action === "open") stages.push([]);
   }
   lines.push("");

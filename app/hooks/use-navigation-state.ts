@@ -18,6 +18,7 @@ export interface NavigationState {
   path?: string;
   publicPath?: string;
   threadId?: string;
+  roomId?: string;
 }
 
 export function useNavigationState() {
@@ -64,16 +65,31 @@ function matchesPathPrefix(pathname: string, prefix: string): boolean {
 
 export function navigationStateForPath(pathname: string): NavigationState {
   const threadId = threadIdFromPath(pathname);
+  const roomId = roomIdFromPath(pathname);
   return {
     view: viewForPath(pathname),
     path: pathname,
     publicPath: appPathFromLocalRoute(pathname),
     ...(threadId ? { threadId } : {}),
+    ...(roomId ? { roomId } : {}),
   };
+}
+
+export function roomIdFromPath(pathname: string): string | null {
+  const encoded = pathname.match(/^\/rooms\/([^/]+)/)?.[1];
+  if (!encoded) return null;
+  try {
+    return decodeURIComponent(encoded).trim() || null;
+    // coercion-ok: a malformed percent-encoding is not a room id.
+  } catch {
+    return null;
+  }
 }
 
 function viewForPath(pathname: string): string {
   if (isChatPathname(pathname)) return "chat";
+  if (/^\/rooms\/[^/]+\/sheet\/?$/.test(pathname)) return "gm-sheet";
+  if (pathname.startsWith("/rooms/")) return "room";
   if (pathname === HOME_PATH) return "home";
   if (pathname.startsWith("/database")) return "database";
   if (pathname.startsWith("/extensions")) return "extensions";
@@ -111,6 +127,14 @@ function pathForView(view?: string): string {
 }
 
 export function pathForCommand(command: any): string {
+  const roomId =
+    typeof command?.roomId === "string" ? command.roomId.trim() : "";
+  if (roomId && command?.view === "room") {
+    return `/rooms/${encodeURIComponent(roomId)}`;
+  }
+  if (roomId && command?.view === "gm-sheet") {
+    return `/rooms/${encodeURIComponent(roomId)}/sheet`;
+  }
   const path = pathForView(command?.view);
   if (command?.view !== "chat" && command?.view !== "ask") return path;
   const threadId =
