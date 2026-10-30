@@ -24,7 +24,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { APP_TITLE } from "@/lib/app-config";
-import { HOME_PATH, isChatPathname } from "@/lib/chat-paths";
+import { isChatPathname } from "@/lib/chat-paths";
 import { TAB_ID } from "@/lib/tab-id";
 
 // Not lazy() like Header: the inspector wraps the page, so a Suspense fallback
@@ -46,7 +46,6 @@ const SIDEBAR_COLLAPSE_KEY = "chat.sidebar.collapsed";
 
 function routeOwnsToolbar(pathname: string): boolean {
   return (
-    pathname === HOME_PATH ||
     isChatPathname(pathname) ||
     pathname === "/database" ||
     pathname.startsWith("/extensions")

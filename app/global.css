@@ -1,39 +1,62 @@
-@import "@fontsource-variable/inter";
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/500.css";
+@import "@fontsource/barlow/600.css";
+@import "@fontsource/barlow/700.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource-variable/jetbrains-mono";
 
 @import "tailwindcss";
 @import "@agent-native/toolkit/styles.css";
 
 @source "./**/*.{ts,tsx}";
+@import "./deadbolt.css";
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 10%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
-  --primary: 0 0% 15%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 95%;
-  --secondary-foreground: 0 0% 15%;
-  --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 43%;
-  --accent: 0 0% 95%;
-  --accent-foreground: 0 0% 15%;
-  --destructive: 0 91% 71%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 0 0% 40%;
-  --radius: 0.5rem;
-  --sidebar-background: 0 0% 97%;
-  --sidebar-foreground: 0 0% 43%;
-  --sidebar-primary: 0 0% 15%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 0% 95%;
-  --sidebar-accent-foreground: 0 0% 15%;
-  --sidebar-border: 0 0% 90%;
-  --sidebar-ring: 0 0% 40%;
+:root,
+:root.dark,
+:root.light,
+.dark,
+.light {
+  /* Darkroom: one dark instrument-panel palette, regardless of OS theme. */
+  --db-ground: #171009;
+  --db-panel: #201711;
+  --db-ink: #ece5d6;
+  --db-muted: #b3a695;
+  --db-hairline: rgba(236, 229, 214, 0.14);
+  --db-accent: #e0913c;
+  --db-alarm: #ff4d3d;
+  --db-font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --db-font-ui: "Barlow", system-ui, sans-serif;
+  --db-font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  color-scheme: dark;
+  --background: 30 44% 6%;
+  --foreground: 41 37% 88%;
+  --card: 24 31% 10%;
+  --card-foreground: 41 37% 88%;
+  --popover: 24 31% 10%;
+  --popover-foreground: 41 37% 88%;
+  --primary: 31 73% 56%;
+  --primary-foreground: 30 44% 6%;
+  --secondary: 24 31% 13%;
+  --secondary-foreground: 41 37% 88%;
+  --muted: 24 31% 13%;
+  --muted-foreground: 34 16% 64%;
+  --accent: 24 31% 14%;
+  --accent-foreground: 41 37% 88%;
+  --destructive: 5 100% 62%;
+  --destructive-foreground: 30 44% 6%;
+  --border: 32 16% 18%;
+  --input: 32 16% 26%;
+  --ring: 31 73% 56%;
+  --radius: 0;
+  --sidebar-background: 30 44% 5%;
+  --sidebar-foreground: 34 16% 64%;
+  --sidebar-primary: 31 73% 56%;
+  --sidebar-primary-foreground: 30 44% 6%;
+  --sidebar-accent: 24 31% 12%;
+  --sidebar-accent-foreground: 41 37% 88%;
+  --sidebar-border: 32 16% 18%;
+  --sidebar-ring: 31 73% 56%;
   --chat-sidebar-width: 17.5rem;
   --chat-sidebar-content-inset: 0.5rem;
   --chat-sidebar-row-padding: 0.75rem;
@@ -228,42 +251,12 @@
   color: hsl(var(--sidebar-accent-foreground));
 }
 
-.dark {
-  --background: 0 0% 13%;
-  --foreground: 0 0% 90%;
-  --card: 0 0% 16.47%;
-  --card-foreground: 0 0% 90%;
-  --popover: 0 0% 15%;
-  --popover-foreground: 0 0% 90%;
-  --primary: 0 0% 75%;
-  --primary-foreground: 0 0% 10%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 90%;
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 0 0% 18%;
-  --accent-foreground: 0 0% 90%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 24%;
-  --input: 0 0% 24%;
-  --ring: 0 0% 60%;
-  --radius: 0.5rem;
-  --sidebar-background: 0 0% 10%;
-  --sidebar-foreground: 0 0% 60%;
-  --sidebar-primary: 0 0% 75%;
-  --sidebar-primary-foreground: 0 0% 10%;
-  --sidebar-accent: 0 0% 16%;
-  --sidebar-accent-foreground: 0 0% 90%;
-  --sidebar-border: 0 0% 20%;
-  --sidebar-ring: 0 0% 60%;
-}
 
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter Variable", "Inter", sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: var(--db-font-ui);
+    font-size: 16px;
   }
 }
 
