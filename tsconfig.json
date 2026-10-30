@@ -22,6 +22,7 @@
     "app/**/*",
     "server/**/*",
     "shared/**/*",
+    "src/**/*",
     "scripts/**/*",
     "vite.config.ts",
     "react-router.config.ts",
