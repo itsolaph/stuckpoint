@@ -23,6 +23,7 @@ import {
   ReactFlow,
   ReactFlowProvider,
   ViewportPortal,
+  useNodesInitialized,
   useReactFlow,
   type Connection,
   type Edge,
@@ -57,6 +58,7 @@ import { VerdictPanel } from "./VerdictPanel";
 
 const nodeTypes = { card: NodeCard };
 const HOP_MS = 600;
+const FIT = { padding: 0.15, maxZoom: 1.1 } as const;
 
 interface UndoEntry {
   label: string;
@@ -80,6 +82,8 @@ function RoomInner({ roomId }: { roomId: string }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { screenToFlowPosition, fitView, getNode } = useReactFlow();
+  const nodesInitialized = useNodesInitialized();
+  const fitted = useRef(false);
   const { data, isLoading, error } = useActionQuery("get-room", { id: roomId });
 
   const [flowNodes, setFlowNodes] = useState<CardNode[]>([]);
@@ -118,6 +122,8 @@ function RoomInner({ roomId }: { roomId: string }) {
     () => new Set(fresh?.verdict === "stuck" ? fresh.blockingNodeIds : []),
     [fresh],
   );
+  // Every node on the reported chain or cycle gets the red outline and badge.
+  const flagged = useMemo(() => new Set([...pinned, ...blocking]), [pinned, blocking]);
 
   useSetPageTitle(
     <span className="flex items-center gap-1.5">
@@ -296,7 +302,7 @@ function RoomInner({ roomId }: { roomId: string }) {
       });
       interacted.current = false;
       await refresh();
-      window.setTimeout(() => void fitView({ padding: 0.2, duration: 200 }), 120);
+      window.setTimeout(() => void fitView({ ...FIT, duration: 200 }), 120);
     } catch (err) {
       fail(err, "Could not arrange the nodes.");
     }
@@ -380,50 +386,58 @@ function RoomInner({ roomId }: { roomId: string }) {
             kind: n.kind,
             name: n.name,
             containerName: container?.name ?? null,
-            requiresCount: n.requires.length,
+            requiresNames: n.requires.map((id) => byId.get(id)?.name ?? "missing node"),
             singleUse: n.singleUse,
             visited: play?.visited.has(n.id) ?? false,
-            pinned: pinned.has(n.id),
+            pinned: flagged.has(n.id),
           },
         };
       });
     });
-  }, [nodes, selectedId, play, pinned]);
+  }, [nodes, selectedId, play, flagged]);
 
   const edges: Edge[] = useMemo(() => {
     const out: Edge[] = [];
-    const mark = (color: string) => ({
+    const ALARM = "#ff4d3d";
+    const arrow = (color: string) => ({
       type: MarkerType.ArrowClosed,
       color,
-      width: 16,
-      height: 16,
+      width: 18,
+      height: 18,
     });
     for (const n of nodes) {
       if (n.containerId) {
-        const red = blocking.has(n.id) && blocking.has(n.containerId);
+        // Dashed "inside" edge from the lock to the item it hides.
+        const red = flagged.has(n.id) && flagged.has(n.containerId);
+        const color = red ? ALARM : "#8f8576";
         out.push({
           id: `c:${n.containerId}:${n.id}`,
           source: n.containerId,
           target: n.id,
-          className: red ? "db-edge-blocking" : "db-edge-contains",
-          markerEnd: mark(red ? "#ff4d3d" : "#8f8576"),
+          label: "inside",
+          style: { stroke: color, strokeWidth: red ? 2 : 1.25, strokeDasharray: "6 5" },
+          labelStyle: { fill: red ? ALARM : "#b3a695", fontSize: 12, fontFamily: "var(--db-font-mono)" },
+          labelBgStyle: { fill: "#171009", fillOpacity: 1 },
+          labelBgPadding: [4, 2],
           data: { relation: "contains" },
         });
       }
       for (const r of n.requires) {
-        const red = blocking.has(n.id) && blocking.has(r);
+        // Solid edge; the arrowhead sits on the required node: "this needs that".
+        const red = flagged.has(n.id) && flagged.has(r);
+        const color = red ? ALARM : "#b3a695";
         out.push({
           id: `r:${r}:${n.id}`,
           source: r,
           target: n.id,
-          className: red ? "db-edge-blocking" : "db-edge-requires",
-          markerEnd: mark(red ? "#ff4d3d" : "#b3a695"),
+          style: { stroke: color, strokeWidth: red ? 2 : 1.5 },
+          markerStart: arrow(color),
           data: { relation: "requires" },
         });
       }
     }
     return out;
-  }, [nodes, blocking]);
+  }, [nodes, flagged]);
 
   const onNodesChange = useCallback((changes: NodeChange<CardNode>[]) => {
     const applied = changes.filter((c) => c.type !== "select");
@@ -445,9 +459,34 @@ function RoomInner({ roomId }: { roomId: string }) {
     const grew = nodes.length > lastCount.current;
     lastCount.current = nodes.length;
     if (!grew || interacted.current) return;
-    const id = window.setTimeout(() => void fitView({ padding: 0.2, duration: 250 }), 150);
+    const id = window.setTimeout(() => void fitView({ ...FIT, duration: 250 }), 250);
     return () => window.clearTimeout(id);
   }, [nodes.length, fitView]);
+
+  // Fit once the cards have been measured, so the graph fills the viewport on load.
+  useEffect(() => {
+    if (fitted.current || !nodesInitialized || flowNodes.length === 0) return;
+    fitted.current = true;
+    const id = window.requestAnimationFrame(() => void fitView({ ...FIT, duration: 0 }));
+    return () => window.cancelAnimationFrame(id);
+  }, [nodesInitialized, flowNodes.length, fitView]);
+
+  // Keep the graph fitted when the canvas is resized, until the user pans or zooms.
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let timer = 0;
+    const observer = new ResizeObserver(() => {
+      if (interacted.current) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void fitView({ ...FIT, duration: 0 }), 120);
+    });
+    observer.observe(el);
+    return () => {
+      window.clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [fitView, isLoading]);
 
   // Tell the agent what is selected.
   useEffect(() => {
@@ -512,7 +551,7 @@ function RoomInner({ roomId }: { roomId: string }) {
   return (
     <div className="db-room">
       <div className="db-toolbar" role="toolbar" aria-label="Room tools">
-        <span className="db-label mr-1 hidden sm:inline">Add</span>
+        <div className="db-toolgroup" role="group" aria-label="Add a node">
         {KINDS.map((k) => {
           const { Icon, label } = KIND_META[k];
           return (
@@ -528,6 +567,8 @@ function RoomInner({ roomId }: { roomId: string }) {
             </button>
           );
         })}
+        </div>
+        <div className="db-toolgroup" role="group" aria-label="Layout and history">
         <button type="button" className="db-btn db-btn--sm" onClick={() => void arrange()}>
           <IconLayoutDashboard size={14} aria-hidden="true" />
           Arrange
@@ -541,6 +582,8 @@ function RoomInner({ roomId }: { roomId: string }) {
           <IconArrowBackUp size={14} aria-hidden="true" />
           Undo
         </button>
+        </div>
+        <div className="db-toolgroup" role="group" aria-label="Room">
         <button
           type="button"
           className="db-btn db-btn--sm"
@@ -551,8 +594,9 @@ function RoomInner({ roomId }: { roomId: string }) {
           }}
         >
           <IconSettings size={14} aria-hidden="true" />
-          Room
+          Room settings
         </button>
+        </div>
         <span className="db-toolbar-spacer" />
         <Link to={`/rooms/${roomId}/sheet`} className="db-btn db-btn--sm">
           <IconFileDescription size={14} aria-hidden="true" />
@@ -569,6 +613,7 @@ function RoomInner({ roomId }: { roomId: string }) {
         </button>
       </div>
 
+      <div className="db-workspace">
       <div className="db-canvas" ref={canvasRef}>
         {nodes.length === 0 ? (
           <p className="db-empty absolute inset-x-0 top-8 z-[5] mx-auto max-w-md border-0 text-center">
@@ -614,7 +659,7 @@ function RoomInner({ roomId }: { roomId: string }) {
           }}
           deleteKeyCode={["Backspace", "Delete"]}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={FIT}
           minZoom={0.3}
           maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
@@ -636,16 +681,21 @@ function RoomInner({ roomId }: { roomId: string }) {
           ) : null}
         </ReactFlow>
 
-        {shown ? (
-          <VerdictPanel
-            roomId={roomId}
-            analysis={shown.analysis}
-            stale={shown.stale}
-            names={names}
-            playingIndex={play ? play.index : null}
-            onFocusNode={focusNode}
-          />
-        ) : null}
+        <div className="db-legend" aria-label="Legend">
+          <span className="db-legend-item">
+            <svg width="30" height="10" aria-hidden="true">
+              <line x1="8" y1="5" x2="30" y2="5" stroke="#b3a695" strokeWidth="1.5" />
+              <path d="M0 5 L8 1.5 L8 8.5 Z" fill="#b3a695" />
+            </svg>
+            needs
+          </span>
+          <span className="db-legend-item">
+            <svg width="30" height="10" aria-hidden="true">
+              <line x1="0" y1="5" x2="30" y2="5" stroke="#8f8576" strokeWidth="1.5" strokeDasharray="5 4" />
+            </svg>
+            inside
+          </span>
+        </div>
 
         {selected ? (
           <NodeInspector
@@ -666,6 +716,15 @@ function RoomInner({ roomId }: { roomId: string }) {
             onClose={() => setRoomPanel(false)}
           />
         ) : null}
+      </div>
+      <VerdictPanel
+        roomId={roomId}
+        analysis={shown ? shown.analysis : null}
+        stale={shown ? shown.stale : false}
+        names={names}
+        playingIndex={play ? play.index : null}
+        onFocusNode={focusNode}
+      />
       </div>
     </div>
   );

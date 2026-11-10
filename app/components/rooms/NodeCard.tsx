@@ -1,4 +1,3 @@
-import { IconMapPinFilled } from "@tabler/icons-react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
 
@@ -8,9 +7,11 @@ export interface CardData extends Record<string, unknown> {
   kind: NodeKind;
   name: string;
   containerName: string | null;
-  requiresCount: number;
+  /** Names of the nodes this one needs, in order. */
+  requiresNames: string[];
   singleUse: boolean;
   visited: boolean;
+  /** Part of the reported blocking chain or requirement cycle. */
   pinned: boolean;
 }
 
@@ -18,12 +19,8 @@ export type CardNode = Node<CardData, "card">;
 
 function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
   const { Icon, label } = KIND_META[data.kind];
-  const subs: string[] = [];
-  if (data.containerName) subs.push(`in ${data.containerName}`);
-  if (data.requiresCount > 0) {
-    subs.push(`needs ${data.requiresCount}`);
-  }
-  if (data.singleUse) subs.push("single use");
+  const needs = data.requiresNames.join(", ");
+  const inside = data.containerName ? `in ${data.containerName}` : "";
 
   return (
     <div
@@ -34,8 +31,8 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
     >
       <Handle type="target" position={Position.Left} className="db-handle" />
       {data.pinned ? (
-        <span className="db-node-pin" role="img" aria-label="Deadlock pin">
-          <IconMapPinFilled size={16} aria-hidden="true" />
+        <span className="db-node-pin" role="img" aria-label="In the blocking chain">
+          Stuck
         </span>
       ) : null}
       <div className="db-node-kind">
@@ -43,7 +40,17 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
         {label}
       </div>
       <div className="db-node-name">{data.name}</div>
-      {subs.length > 0 ? <div className="db-node-sub">{subs.join(" · ")}</div> : null}
+      {inside ? (
+        <div className="db-node-sub" title={inside}>
+          {inside}
+        </div>
+      ) : null}
+      {needs ? (
+        <div className="db-node-sub" title={`needs ${needs}`}>
+          needs {needs}
+        </div>
+      ) : null}
+      {data.singleUse ? <div className="db-node-sub">single use</div> : null}
       <Handle type="source" position={Position.Right} className="db-handle" />
     </div>
   );
