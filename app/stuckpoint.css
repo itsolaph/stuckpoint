@@ -1007,7 +1007,7 @@
   bottom: 0;
   left: calc(0.875rem - 1px);
   width: 2px;
-  background: var(--sp-line);
+  background: var(--sp-peg);
 }
 .db-sheet [data-section="walkthrough"] li:last-child::before {
   background: var(--sp-escaped);
@@ -1050,7 +1050,14 @@
 /* ---- Agent chat in the same tokens ---- */
 .agentkit-chat,
 .agentkit-tokens {
+  --agentkit-radius: var(--sp-radius);
+  --agentkit-radius-inner: var(--sp-radius);
   font-family: var(--sp-font);
+}
+/* The composer frame already turns ink on focus; no second ring inside it. */
+.agentkit-chat textarea:focus-visible,
+.agentkit-chat [contenteditable]:focus-visible {
+  outline: none;
 }
 .agentkit-message[data-role="user"] .agentkit-message-content {
   background: var(--sp-ink);
