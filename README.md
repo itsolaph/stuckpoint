@@ -1,4 +1,4 @@
-# Deadbolt
+# Stuckpoint
 
 An escape-room playtester. One designer and one AI agent share a live puzzle
 canvas. You draw the room (or paste a description and the agent builds it),

@@ -32,7 +32,7 @@ Before building common workspace or agent UI, read `agent-native-toolkit`; for s
 
 - Guarded verification: run `pnpm agent-native:doctor`; fix findings before done.
 
-## Deadbolt (escape-room playtester)
+## Stuckpoint (escape-room playtester)
 
 Routes: `/home` room list, `/rooms/<roomId>` canvas, `/rooms/<roomId>/sheet` GM sheet, `/chat`. Navigation adds `roomId`; the selected node is in tab state `selection`.
 

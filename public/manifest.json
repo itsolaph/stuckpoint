@@ -1,7 +1,7 @@
 {
-  "name": "Deadbolt",
-  "short_name": "Deadbolt",
-  "description": "Workspace app for Deadbolt.",
+  "name": "Stuckpoint",
+  "short_name": "Stuckpoint",
+  "description": "Escape-room playtester built on Agent-Native.",
   "start_url": "./home",
   "background_color": "#111111",
   "theme_color": "#18181B",

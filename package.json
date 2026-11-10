@@ -1,8 +1,8 @@
 {
-  "name": "deadbolt",
-  "displayName": "Deadbolt",
+  "name": "stuckpoint",
+  "displayName": "Stuckpoint",
   "private": true,
-  "description": "Workspace app for Deadbolt.",
+  "description": "Escape-room playtester built on Agent-Native.",
   "type": "module",
   "scripts": {
     "migrate:production": "tsx scripts/migrate-production.ts",

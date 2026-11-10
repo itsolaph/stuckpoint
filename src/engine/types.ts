@@ -1,4 +1,4 @@
-/** Pure data types for the Deadbolt playtest engine. No React, no I/O. */
+/** Pure data types for the Stuckpoint playtest engine. No React, no I/O. */
 
 export type NodeKind = "item" | "clue" | "lock" | "exit";
 
