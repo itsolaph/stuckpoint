@@ -5,6 +5,7 @@ import { desc, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDb, schema } from "../server/db/index.js";
+import { parseDbTime } from "../src/time.js";
 
 export default defineAction({
   description:
@@ -17,6 +18,7 @@ export default defineAction({
         title: z.string(),
         story: z.string(),
         createdAt: z.string(),
+        updatedAt: z.string(),
         nodeCount: z.number(),
         verdict: z.enum(["escaped", "stuck"]).nullable(),
       }),
@@ -61,6 +63,20 @@ export default defineAction({
       .orderBy(desc(playthroughs.createdAt))
       .limit(2000);
 
+    const edits = await db
+      .select({ roomId: nodes.roomId, updatedAt: sql<string>`max(${nodes.updatedAt})` })
+      .from(nodes)
+      .where(inArray(nodes.roomId, ids))
+      .groupBy(nodes.roomId);
+    const editedBy = new Map(edits.map((e) => [e.roomId, e.updatedAt]));
+    const lastEdit = (roomId: string, createdAt: string): string => {
+      const latest = editedBy.get(roomId);
+      const created = parseDbTime(createdAt);
+      const edited = latest ? parseDbTime(latest) : Number.NaN;
+      const ms = Number.isNaN(edited) ? created : Math.max(created, edited);
+      return Number.isNaN(ms) ? createdAt : new Date(ms).toISOString();
+    };
+
     const countBy = new Map(counts.map((c) => [c.roomId, Number(c.n)]));
     const verdictBy = new Map<string, "escaped" | "stuck">();
     for (const p of plays) {
@@ -69,6 +85,7 @@ export default defineAction({
     return {
       rooms: rows.map((r) => ({
         ...r,
+        updatedAt: lastEdit(r.id, r.createdAt),
         nodeCount: countBy.get(r.id) ?? 0,
         verdict: verdictBy.get(r.id) ?? null,
       })),

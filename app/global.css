@@ -192,7 +192,7 @@
   color: hsl(var(--sidebar-foreground) / 0.72);
 }
 
-.chat-sidebar-thread-title[data-overflow="true"] {
+.chat-sidebar-thread-title[data-overflow="never"] {
   mask-image: linear-gradient(
     to right,
     hsl(var(--foreground)) 0,
@@ -203,16 +203,12 @@
 
 .chat-sidebar-thread-title__content {
   display: block;
-  width: max-content;
-  transform: translateX(0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.an-chat-history-row:hover
-  .chat-sidebar-thread-title[data-overflow="true"]
-  .chat-sidebar-thread-title__content {
-  animation: chat-sidebar-title-reveal
-    var(--chat-sidebar-title-duration, 1800ms) ease-in-out 350ms;
-}
+/* Titles truncate with an ellipsis; the hover marquee is disabled on purpose. */
 
 .chat-sidebar-history.an-chat-history--rail
   .an-chat-history-row__menu-trigger--pinned {

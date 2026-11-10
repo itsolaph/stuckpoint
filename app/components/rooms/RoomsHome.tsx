@@ -4,13 +4,14 @@ import {
   useActionMutation,
   useActionQuery,
 } from "@agent-native/core/client/hooks";
-import { IconPlus } from "@tabler/icons-react";
+import { IconArrowRight, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { SAMPLE_ROOMS, SAMPLE_KEYS } from "../../../src/samples";
+import { relativeTime } from "../../../src/time";
 
 import { NewRoomDialog } from "./NewRoomDialog";
 
@@ -80,7 +81,8 @@ export function RoomsHome() {
                 <div className="min-w-0">
                   <div className="db-room-title">{room.title}</div>
                   <div className="db-room-meta">
-                    {room.nodeCount} {room.nodeCount === 1 ? "node" : "nodes"}
+                    edited {relativeTime(room.updatedAt)} · {room.nodeCount}{" "}
+                    {room.nodeCount === 1 ? "node" : "nodes"}
                   </div>
                 </div>
                 {room.verdict ? (
@@ -90,7 +92,10 @@ export function RoomsHome() {
                 ) : (
                   <span className="db-chip">not playtested</span>
                 )}
-                <span className="db-mono text-[var(--db-muted)]">Open</span>
+                <span className="db-open">
+                  Open
+                  <IconArrowRight size={14} aria-hidden="true" />
+                </span>
               </Link>
             </li>
           ))}

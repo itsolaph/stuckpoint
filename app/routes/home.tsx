@@ -15,6 +15,7 @@ export function meta() {
 }
 
 export default function HomeRoute() {
-  useSetPageTitle(<span className="db-display">Rooms</span>);
+  // The list below carries the only "Rooms" heading.
+  useSetPageTitle("");
   return <RoomsHome />;
 }
