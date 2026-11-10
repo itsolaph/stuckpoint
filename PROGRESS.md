@@ -19,6 +19,7 @@
 - Proof gate is a `finalResponseGuard`, not a loop `processors` entry: the framework docs say `processors` is not threaded through the HTTP chat handler yet, while `finalResponseGuard` is.
 - `@fontsource-variable/barlow` does not exist on npm; Barlow comes from `@fontsource/barlow` (static weights), the display face is Barlow Condensed, mono is JetBrains Mono Variable.
 - The brief's design lint script lives in a directory this session was told never to read, so it was not run. Replaced by a manual check of the brief's rules (zero radius, hairlines, no gradients, no `transition: all`, transform-only animation with reduced-motion fallback, no emoji, visible focus, body text 15-16px).
+- 2026-11-10 Restart after interruption: tree clean, all polish commits present. Starting `PORT=4314 pnpm exec agent-native dev` is still refused (approval required, non-interactive), so browser verification remains undone. See deadbolt-build/POLISH-BLOCKED.md.
 - Polish: containment edges and requirement arrowheads are styled with inline edge `style` (the earlier `className` landed on the wrapper group, so dashes never showed). Requirement arrowheads sit on the required node ("this needs that"), matching the legend and the chain wording.
 - Polish: the red badge is the word "Stuck" on every node in the blocking chain or cycle (pins plus blocking ids), not a glyph.
 - Polish: the verdict dock is always visible (idle text before the first run) so the canvas never resizes after the first playtest.
