@@ -28,7 +28,7 @@ export function MobileAppBar({
     <header
       data-mobile-app-bar=""
       className={cn(
-        "flex h-12 shrink-0 items-center gap-2 border-b border-border bg-background px-2",
+        "flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card px-2",
         className,
       )}
     >

@@ -4,7 +4,10 @@ import {
   setClientAppState,
   useActionQuery,
 } from "@agent-native/core/client/hooks";
-import { useSetPageTitle } from "@agent-native/toolkit/app-shell/header-actions";
+import {
+  useSetHeaderActions,
+  useSetPageTitle,
+} from "@agent-native/toolkit/app-shell/header-actions";
 import {
   IconArrowBackUp,
   IconChevronRight,
@@ -18,6 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   applyNodeChanges,
   Background,
+  BackgroundVariant,
   Controls,
   MarkerType,
   ReactFlow,
@@ -106,6 +110,7 @@ function RoomInner({ roomId }: { roomId: string }) {
 
   const nodes: RoomNode[] = useMemo(() => (data?.nodes ?? []) as RoomNode[], [data]);
   const names = useMemo(() => new Map(nodes.map((n) => [n.id, n.name])), [nodes]);
+  const kinds = useMemo(() => new Map(nodes.map((n) => [n.id, n.kind])), [nodes]);
   const selected = nodes.find((n) => n.id === selectedId) ?? null;
 
   const shown = play
@@ -126,13 +131,70 @@ function RoomInner({ roomId }: { roomId: string }) {
   const flagged = useMemo(() => new Set([...pinned, ...blocking]), [pinned, blocking]);
 
   useSetPageTitle(
-    <span className="flex items-center gap-1.5">
-      <Link to="/home" className="text-[var(--db-muted)] hover:text-[var(--db-ink)]">
+    <span className="db-crumb">
+      <Link to="/home" className="db-hide-sm">
         Rooms
       </Link>
-      <IconChevronRight size={14} aria-hidden="true" className="text-[var(--db-muted)]" />
-      <span className="truncate">{data?.room.title ?? "…"}</span>
+      <IconChevronRight size={14} aria-hidden="true" className="db-hide-sm text-[var(--sp-muted)]" />
+      {data ? (
+        <TitleInput title={data.room.title} onRename={(t) => void rename(t)} />
+      ) : (
+        <span>…</span>
+      )}
     </span>,
+  );
+
+  useSetHeaderActions(
+    data ? (
+      <div className="db-header-actions" role="toolbar" aria-label="Room tools">
+        <button
+          type="button"
+          className="db-btn db-btn--sm db-btn--quiet db-hide-sm"
+          onClick={() => void arrange()}
+          title="Arrange the nodes"
+        >
+          <IconLayoutDashboard size={15} aria-hidden="true" />
+          <span className="db-hide-sm">Arrange</span>
+        </button>
+        <button
+          type="button"
+          className="db-btn db-btn--sm db-btn--quiet"
+          disabled={undoCount === 0}
+          onClick={() => void undo()}
+          title="Undo the last change"
+        >
+          <IconArrowBackUp size={15} aria-hidden="true" />
+          <span className="db-hide-sm">Undo</span>
+        </button>
+        <button
+          type="button"
+          className="db-btn db-btn--sm db-btn--quiet"
+          aria-pressed={roomPanel}
+          aria-label="Room settings"
+          title="Room settings"
+          onClick={() => {
+            setSelectedId(null);
+            setRoomPanel((v) => !v);
+          }}
+        >
+          <IconSettings size={15} aria-hidden="true" />
+        </button>
+        <span className="db-header-sep db-hide-sm" aria-hidden="true" />
+        <Link to={`/rooms/${roomId}/sheet`} className="db-btn db-btn--sm" title="GM sheet">
+          <IconFileDescription size={15} aria-hidden="true" />
+          <span className="db-hide-sm">GM sheet</span>
+        </Link>
+        <button
+          type="button"
+          className="db-btn db-btn--sm db-btn--primary"
+          disabled={running || nodes.length === 0}
+          onClick={() => void startPlaytest()}
+        >
+          <IconPlayerPlayFilled size={13} aria-hidden="true" />
+          {running ? "Walking…" : "Playtest"}
+        </button>
+      </div>
+    ) : null,
   );
 
   // ---- cache helpers ----
@@ -398,7 +460,7 @@ function RoomInner({ roomId }: { roomId: string }) {
 
   const edges: Edge[] = useMemo(() => {
     const out: Edge[] = [];
-    const ALARM = "#ff4d3d";
+    const ALARM = "#E0321F";
     const arrow = (color: string) => ({
       type: MarkerType.ArrowClosed,
       color,
@@ -409,23 +471,23 @@ function RoomInner({ roomId }: { roomId: string }) {
       if (n.containerId) {
         // Dashed "inside" edge from the lock to the item it hides.
         const red = flagged.has(n.id) && flagged.has(n.containerId);
-        const color = red ? ALARM : "#8f8576";
+        const color = red ? ALARM : "#8B929A";
         out.push({
           id: `c:${n.containerId}:${n.id}`,
           source: n.containerId,
           target: n.id,
           label: "inside",
           style: { stroke: color, strokeWidth: red ? 2 : 1.25, strokeDasharray: "6 5" },
-          labelStyle: { fill: red ? ALARM : "#b3a695", fontSize: 12, fontFamily: "var(--db-font-mono)" },
-          labelBgStyle: { fill: "#171009", fillOpacity: 1 },
-          labelBgPadding: [4, 2],
+          labelStyle: { fill: red ? ALARM : "#5B6169", fontSize: 12, fontWeight: 600 },
+          labelBgStyle: { fill: "#E4E7EB", fillOpacity: 1 },
+          labelBgPadding: [5, 3],
           data: { relation: "contains" },
         });
       }
       for (const r of n.requires) {
         // Solid edge; the arrowhead sits on the required node: "this needs that".
         const red = flagged.has(n.id) && flagged.has(r);
-        const color = red ? ALARM : "#b3a695";
+        const color = red ? ALARM : "#5B6169";
         out.push({
           id: `r:${r}:${n.id}`,
           source: r,
@@ -528,9 +590,6 @@ function RoomInner({ roomId }: { roomId: string }) {
   if (isLoading) {
     return (
       <div className="db-room" aria-busy="true">
-        <div className="db-toolbar">
-          <Skeleton className="h-9 w-72" />
-        </div>
         <Skeleton className="m-3 flex-1" />
       </div>
     );
@@ -540,7 +599,7 @@ function RoomInner({ roomId }: { roomId: string }) {
       <div className="db-home">
         <p className="db-empty">
           {actionErrorMessage(error) ?? "This room could not be opened."}{" "}
-          <Link to="/home" className="text-[var(--db-accent)]">
+          <Link to="/home" className="font-semibold text-[var(--sp-lock)] underline">
             Back to rooms
           </Link>
         </p>
@@ -550,76 +609,47 @@ function RoomInner({ roomId }: { roomId: string }) {
 
   return (
     <div className="db-room">
-      <div className="db-toolbar" role="toolbar" aria-label="Room tools">
-        <div className="db-toolgroup" role="group" aria-label="Add a node">
-        {KINDS.map((k) => {
-          const { Icon, label } = KIND_META[k];
-          return (
-            <button
-              key={k}
-              type="button"
-              className="db-btn db-btn--sm"
-              onClick={() => void addNode(k)}
-            >
-              <IconPlus size={14} aria-hidden="true" />
-              <Icon size={14} aria-hidden="true" />
-              {label}
-            </button>
-          );
-        })}
-        </div>
-        <div className="db-toolgroup" role="group" aria-label="Layout and history">
-        <button type="button" className="db-btn db-btn--sm" onClick={() => void arrange()}>
-          <IconLayoutDashboard size={14} aria-hidden="true" />
-          Arrange
-        </button>
-        <button
-          type="button"
-          className="db-btn db-btn--sm"
-          disabled={undoCount === 0}
-          onClick={() => void undo()}
-        >
-          <IconArrowBackUp size={14} aria-hidden="true" />
-          Undo
-        </button>
-        </div>
-        <div className="db-toolgroup" role="group" aria-label="Room">
-        <button
-          type="button"
-          className="db-btn db-btn--sm"
-          aria-pressed={roomPanel}
-          onClick={() => {
-            setSelectedId(null);
-            setRoomPanel((v) => !v);
-          }}
-        >
-          <IconSettings size={14} aria-hidden="true" />
-          Room settings
-        </button>
-        </div>
-        <span className="db-toolbar-spacer" />
-        <Link to={`/rooms/${roomId}/sheet`} className="db-btn db-btn--sm">
-          <IconFileDescription size={14} aria-hidden="true" />
-          GM sheet
-        </Link>
-        <button
-          type="button"
-          className="db-btn db-btn--primary"
-          disabled={running || nodes.length === 0}
-          onClick={() => void startPlaytest()}
-        >
-          <IconPlayerPlayFilled size={14} aria-hidden="true" />
-          {running ? "Walking…" : "Playtest"}
-        </button>
-      </div>
-
-      <div className="db-workspace">
       <div className="db-canvas" ref={canvasRef}>
+        <div className="db-toolbox" role="group" aria-label="Add a node">
+          {KINDS.map((k) => {
+            const { label } = KIND_META[k];
+            return (
+              <button
+                key={k}
+                type="button"
+                className="db-add db-kind"
+                data-kind={k}
+                onClick={() => void addNode(k)}
+              >
+                <span className="db-swatch" aria-hidden="true" />
+                {label}
+                <IconPlus size={13} stroke={2.25} aria-hidden="true" />
+              </button>
+            );
+          })}
+          <span className="db-legend" aria-label="Legend">
+            <span className="db-legend-item">
+              <svg width="30" height="10" aria-hidden="true">
+                <line x1="8" y1="5" x2="30" y2="5" stroke="#5B6169" strokeWidth="1.5" />
+                <path d="M0 5 L8 1.5 L8 8.5 Z" fill="#5B6169" />
+              </svg>
+              needs
+            </span>
+            <span className="db-legend-item">
+              <svg width="30" height="10" aria-hidden="true">
+                <line x1="0" y1="5" x2="30" y2="5" stroke="#8B929A" strokeWidth="1.5" strokeDasharray="6 5" />
+              </svg>
+              inside
+            </span>
+          </span>
+        </div>
         {nodes.length === 0 ? (
-          <p className="db-empty absolute inset-x-0 top-8 z-[5] mx-auto max-w-md border-0 text-center">
-            An empty room. Add a node above, or ask the agent in the sidebar to
-            build the room from a description.
+          <p className="db-empty db-canvas-empty">
+            An empty room. Add a lock, item, clue or exit with the buttons at
+            the top left, or ask the agent to build the room from a description.
           </p>
+        ) : !shown ? (
+          <p className="db-idle">Press Playtest to walk this room like a player.</p>
         ) : null}
         <ReactFlow
           nodes={flowNodes}
@@ -660,13 +690,19 @@ function RoomInner({ roomId }: { roomId: string }) {
           deleteKeyCode={["Backspace", "Delete"]}
           fitView
           fitViewOptions={FIT}
-          minZoom={0.3}
+          minZoom={0.15}
           maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
-          colorMode="dark"
+          colorMode="light"
           nodesConnectable
         >
-          <Background gap={28} size={1} color="rgba(236,229,214,0.08)" />
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={28}
+            size={3}
+            color="#C9CED5"
+            bgColor="#E4E7EB"
+          />
           <Controls showInteractive={false} />
           {play && tokenNode ? (
             <ViewportPortal>
@@ -680,22 +716,6 @@ function RoomInner({ roomId }: { roomId: string }) {
             </ViewportPortal>
           ) : null}
         </ReactFlow>
-
-        <div className="db-legend" aria-label="Legend">
-          <span className="db-legend-item">
-            <svg width="30" height="10" aria-hidden="true">
-              <line x1="8" y1="5" x2="30" y2="5" stroke="#b3a695" strokeWidth="1.5" />
-              <path d="M0 5 L8 1.5 L8 8.5 Z" fill="#b3a695" />
-            </svg>
-            needs
-          </span>
-          <span className="db-legend-item">
-            <svg width="30" height="10" aria-hidden="true">
-              <line x1="0" y1="5" x2="30" y2="5" stroke="#8f8576" strokeWidth="1.5" strokeDasharray="5 4" />
-            </svg>
-            inside
-          </span>
-        </div>
 
         {selected ? (
           <NodeInspector
@@ -722,10 +742,37 @@ function RoomInner({ roomId }: { roomId: string }) {
         analysis={shown ? shown.analysis : null}
         stale={shown ? shown.stale : false}
         names={names}
+        kinds={kinds}
         playingIndex={play ? play.index : null}
         onFocusNode={focusNode}
       />
-      </div>
     </div>
+  );
+}
+
+/** The room title, edited in place in the header bar. */
+function TitleInput({ title, onRename }: { title: string; onRename: (t: string) => void }) {
+  const [value, setValue] = useState(title);
+  useEffect(() => setValue(title), [title]);
+  return (
+    <input
+      className="db-title-input"
+      aria-label="Room title"
+      value={value}
+      maxLength={120}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={() => {
+        const next = value.trim();
+        if (next && next !== title) onRename(next);
+        else setValue(title);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.currentTarget.blur();
+        if (e.key === "Escape") {
+          setValue(title);
+          e.currentTarget.blur();
+        }
+      }}
+    />
   );
 }

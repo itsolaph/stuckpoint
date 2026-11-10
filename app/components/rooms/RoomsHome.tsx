@@ -4,12 +4,13 @@ import {
   useActionMutation,
   useActionQuery,
 } from "@agent-native/core/client/hooks";
-import { IconArrowRight, IconPlus } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { KINDS, KIND_META, type NodeKind } from "@/lib/room-kinds";
 import { SAMPLE_ROOMS, SAMPLE_KEYS } from "../../../src/samples";
 import { relativeTime } from "../../../src/time";
 
@@ -51,81 +52,105 @@ export function RoomsHome() {
 
   return (
     <div className="db-home">
-      <div className="db-section-head">
-        <h2>Rooms</h2>
-        <button
-          type="button"
-          className="db-btn db-btn--primary"
-          onClick={() => setDialogOpen(true)}
-        >
-          <IconPlus size={16} stroke={2} aria-hidden="true" />
-          New room
-        </button>
-      </div>
-
-      {isLoading ? (
-        <div aria-busy="true" className="flex flex-col gap-2">
-          <Skeleton className="h-14 w-full" />
-          <Skeleton className="h-14 w-full" />
-        </div>
-      ) : rooms.length === 0 ? (
-        <p className="db-empty">
-          No rooms yet. Describe one and the agent will draw it, or load a
-          sample below.
+      <section className="db-hero">
+        <h1>Find the stuck point before your players do.</h1>
+        <p>
+          Lay out the locks, items and clues of your escape room, then press
+          Playtest: a walker plays it like a team would and shows the exact
+          chain that leaves players stuck.
         </p>
-      ) : (
-        <ul className="m-0 list-none p-0">
-          {rooms.map((room) => (
-            <li key={room.id}>
-              <Link to={`/rooms/${room.id}`} className="db-room-row">
-                <div className="min-w-0">
-                  <div className="db-room-title">{room.title}</div>
-                  <div className="db-room-meta">
-                    edited {relativeTime(room.updatedAt)} · {room.nodeCount}{" "}
-                    {room.nodeCount === 1 ? "node" : "nodes"}
-                  </div>
-                </div>
-                {room.verdict ? (
-                  <span className={`db-chip db-chip--${room.verdict}`}>
-                    {room.verdict}
-                  </span>
-                ) : (
-                  <span className="db-chip">not playtested</span>
-                )}
-                <span className="db-open">
-                  Open
-                  <IconArrowRight size={14} aria-hidden="true" />
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+        <div className="db-hero-actions">
+          <button
+            type="button"
+            className="db-btn db-btn--primary"
+            onClick={() => setDialogOpen(true)}
+          >
+            <IconPlus size={16} stroke={2.25} aria-hidden="true" />
+            New room
+          </button>
+        </div>
+      </section>
 
-      <div className="db-section-head" style={{ marginTop: "2.5rem" }}>
-        <h2>Sample rooms</h2>
-      </div>
-      <div className="db-sample-grid">
-        {SAMPLE_KEYS.map((key) => {
-          const sample = SAMPLE_ROOMS[key];
-          const loading =
-            loadSample.isPending && loadSample.variables?.sample === key;
-          return (
-            <div key={key} className="db-sample">
-              <div className="db-room-title">{sample.title}</div>
-              <p>{sample.blurb}</p>
-              <button
-                type="button"
-                className="db-btn"
-                disabled={loadSample.isPending}
-                onClick={() => loadSample.mutate({ sample: key })}
-              >
-                {loading ? "Loading…" : "Load sample"}
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      <section className="db-home-section" aria-labelledby="samples-heading">
+        <h2 id="samples-heading">Or open a sample room</h2>
+        <div className="db-sample-grid">
+          {SAMPLE_KEYS.map((key) => {
+            const sample = SAMPLE_ROOMS[key];
+            const loading =
+              loadSample.isPending && loadSample.variables?.sample === key;
+            const counts = KINDS.map((k) => ({
+              kind: k,
+              n: sample.nodes.filter((node) => node.kind === k).length,
+            })).filter((c) => c.n > 0);
+            return (
+              <div key={key} className="db-sample">
+                <div
+                  className="db-sample-strip"
+                  aria-label={`${sample.nodes.length} nodes: ${counts
+                    .map((c) => kindCount(c.kind, c.n))
+                    .join(", ")}`}
+                  role="img"
+                >
+                  {counts.map((c) => (
+                    <span key={c.kind} className="db-count-chip db-kind" data-kind={c.kind}>
+                      <span className="db-swatch" aria-hidden="true" />
+                      {kindCount(c.kind, c.n)}
+                    </span>
+                  ))}
+                </div>
+                <div className="db-sample-title">{sample.title}</div>
+                <p>{sample.blurb}</p>
+                <button
+                  type="button"
+                  className="db-btn db-btn--sm"
+                  disabled={loadSample.isPending}
+                  onClick={() => loadSample.mutate({ sample: key })}
+                >
+                  {loading ? "Loading…" : "Load sample"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="db-home-section" aria-labelledby="rooms-heading">
+        <h2 id="rooms-heading">Your rooms</h2>
+        {isLoading ? (
+          <div aria-busy="true" className="flex flex-col gap-2">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        ) : rooms.length === 0 ? (
+          <p className="db-empty">
+            No rooms yet. Load a sample above to see a stuck room, or start
+            your own with New room and describe it in a few sentences.
+          </p>
+        ) : (
+          <ul className="db-rows">
+            {rooms.map((room) => (
+              <li key={room.id}>
+                <Link to={`/rooms/${room.id}`} className="db-room-row">
+                  <span className="db-room-name">{room.title}</span>
+                  <span className="db-room-cell">
+                    {room.nodeCount} {room.nodeCount === 1 ? "node" : "nodes"}
+                  </span>
+                  <span className="db-room-cell" data-verdict={room.verdict ?? "none"}>
+                    {room.verdict === "stuck"
+                      ? "Stuck"
+                      : room.verdict === "escaped"
+                        ? "Escaped"
+                        : "Not playtested yet"}
+                  </span>
+                  <span className="db-room-cell" data-col="updated">
+                    Edited {relativeTime(room.updatedAt)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {dialogOpen ? (
         <NewRoomDialog
@@ -136,4 +161,9 @@ export function RoomsHome() {
       ) : null}
     </div>
   );
+}
+
+function kindCount(kind: NodeKind, n: number): string {
+  const label = KIND_META[kind].label.toLowerCase();
+  return `${n} ${n === 1 ? label : `${label}s`}`;
 }

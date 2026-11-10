@@ -68,7 +68,7 @@ export function NewRoomDialog({ pending, onClose, onSubmit }: NewRoomDialogProps
             placeholder="Players wake in a lighthouse. A brass key opens the lamp room, but it is locked in the keeper's chest. The chest code is on a tide table hidden in the logbook…"
           />
         </div>
-        <p className="m-0 text-[0.9375rem] text-[var(--db-muted)]">
+        <p className="m-0 text-[0.9375rem] text-[var(--sp-muted)]">
           With a description, the agent builds the cards on the canvas and
           playtests the result. Without one you get an empty canvas.
         </p>

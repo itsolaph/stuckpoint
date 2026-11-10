@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PRODUCT_WORDMARK } from "@/brand";
+import { ShackleMark } from "@/components/rooms/ShackleMark";
 import { APP_TITLE } from "@/lib/app-config";
 import { chatThreadPath, HOME_PATH, threadIdFromPath } from "@/lib/chat-paths";
 import { cn } from "@/lib/utils";
@@ -373,10 +374,7 @@ export function Sidebar({
                 aria-label={APP_TITLE}
                 className="flex size-8 items-center justify-center rounded outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
               >
-                <IconLock
-                  aria-hidden="true"
-                  className="size-4 text-sidebar-accent-foreground"
-                />
+                <ShackleMark />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">{APP_TITLE}</TooltipContent>
@@ -387,7 +385,10 @@ export function Sidebar({
               to="/"
               className="flex min-w-0 flex-1 items-center gap-3 rounded outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
             >
-              <span className="db-wordmark truncate">{PRODUCT_WORDMARK}</span>
+              <span className="db-wordmark truncate">
+                <ShackleMark />
+                {PRODUCT_WORDMARK}
+              </span>
             </Link>
           </>
         )}

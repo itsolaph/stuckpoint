@@ -40,10 +40,10 @@ export function RoomPanel({
   return (
     <aside className="db-inspector" aria-label="Room details">
       <div className="db-inspector-head">
-        <span className="db-chip">Room</span>
+        <h2 className="db-inspector-title">Room settings</h2>
         <button
           type="button"
-          className="db-btn db-btn--sm"
+          className="db-btn db-btn--sm db-btn--quiet db-btn--icon"
           onClick={onClose}
           aria-label="Close room details"
         >
@@ -88,7 +88,7 @@ export function RoomPanel({
       </div>
       <button
         type="button"
-        className="db-btn db-btn--danger"
+        className="db-btn db-btn--sm db-btn--danger self-start"
         onClick={() => setConfirming(true)}
       >
         <IconTrash size={16} aria-hidden="true" />

@@ -61,10 +61,13 @@ export function NodeInspector({
   return (
     <aside className="db-inspector" aria-label="Selected node">
       <div className="db-inspector-head">
-        <span className="db-chip">{KIND_META[node.kind].label}</span>
+        <h2 className="db-inspector-title db-kind" data-kind={node.kind}>
+          <span className="db-swatch" aria-hidden="true" />
+          {KIND_META[node.kind].label}
+        </h2>
         <button
           type="button"
-          className="db-btn db-btn--sm"
+          className="db-btn db-btn--sm db-btn--quiet db-btn--icon"
           onClick={onClose}
           aria-label="Close inspector"
         >
@@ -127,9 +130,9 @@ export function NodeInspector({
       </div>
 
       <fieldset className="db-field m-0 border-0 p-0">
-        <legend className="db-label mb-1.5 p-0">Requires</legend>
+        <legend className="db-label mb-1.5 p-0">Needs</legend>
         {requirable.length === 0 ? (
-          <p className="m-0 text-[0.9375rem] text-[var(--db-muted)]">
+          <p className="m-0 text-[0.9375rem] text-[var(--sp-muted)]">
             Add items, clues or locks to require them.
           </p>
         ) : (
@@ -180,7 +183,7 @@ export function NodeInspector({
         <div className="db-field">
           <span className="db-label">Hint ladder</span>
           {hints && hints.length > 0 ? (
-            <ol className="db-hints">
+            <ol className="db-rungs">
               {hints.map((h, i) => (
                 <li key={i}>
                   <strong>{HINT_LABELS[i] ?? `Level ${i + 1}`}:</strong> {h}
@@ -188,13 +191,13 @@ export function NodeInspector({
               ))}
             </ol>
           ) : (
-            <p className="m-0 text-[0.9375rem] text-[var(--db-muted)]">
+            <p className="m-0 text-[0.9375rem] text-[var(--sp-muted)]">
               No hints saved for this puzzle yet.
             </p>
           )}
           <button
             type="button"
-            className="db-btn db-btn--sm"
+            className="db-btn db-btn--sm self-start"
             onClick={() =>
               sendToAgentChat({
                 message: `Write a 3-level hint ladder (nudge, direction, answer) for "${node.name}" and save it with save-hint-ladder.`,
@@ -209,7 +212,7 @@ export function NodeInspector({
         </div>
       ) : null}
 
-      <button type="button" className="db-btn db-btn--danger" onClick={onDelete}>
+      <button type="button" className="db-btn db-btn--sm db-btn--danger self-start" onClick={onDelete}>
         <IconTrash size={16} aria-hidden="true" />
         Delete node
       </button>

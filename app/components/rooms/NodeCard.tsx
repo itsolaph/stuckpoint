@@ -3,6 +3,8 @@ import { memo } from "react";
 
 import { KIND_META, type NodeKind } from "@/lib/room-kinds";
 
+import { ShackleArc } from "./ShackleMark";
+
 export interface CardData extends Record<string, unknown> {
   kind: NodeKind;
   name: string;
@@ -25,10 +27,12 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
   return (
     <div
       className="db-node"
+      data-kind={data.kind}
       data-selected={selected ? "true" : "false"}
       data-visited={data.visited ? "true" : "false"}
       data-pinned={data.pinned ? "true" : "false"}
     >
+      {data.kind === "lock" ? <ShackleArc className="db-shackle" /> : null}
       <Handle type="target" position={Position.Left} className="db-handle" />
       {data.pinned ? (
         <span className="db-node-pin" role="img" aria-label="In the blocking chain">
@@ -36,7 +40,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
         </span>
       ) : null}
       <div className="db-node-kind">
-        <Icon size={14} stroke={1.75} aria-hidden="true" />
+        <Icon size={14} stroke={1.9} aria-hidden="true" />
         {label}
       </div>
       <div className="db-node-name">{data.name}</div>

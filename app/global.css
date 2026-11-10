@@ -1,62 +1,80 @@
-@import "@fontsource/barlow/400.css";
-@import "@fontsource/barlow/500.css";
-@import "@fontsource/barlow/600.css";
-@import "@fontsource/barlow/700.css";
-@import "@fontsource/barlow-condensed/600.css";
-@import "@fontsource/barlow-condensed/700.css";
-@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/archivo/wdth.css";
 
 @import "tailwindcss";
 @import "@agent-native/toolkit/styles.css";
 
 @source "./**/*.{ts,tsx}";
-@import "./deadbolt.css";
+@import "./stuckpoint.css";
 
 :root,
 :root.dark,
 :root.light,
 .dark,
 .light {
-  /* Darkroom: one dark instrument-panel palette, regardless of OS theme. */
-  --db-ground: #171009;
-  --db-panel: #201711;
-  --db-ink: #ece5d6;
-  --db-muted: #b3a695;
-  --db-hairline: rgba(236, 229, 214, 0.14);
-  --db-accent: #e0913c;
-  --db-alarm: #ff4d3d;
-  --db-font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --db-font-ui: "Barlow", system-ui, sans-serif;
-  --db-font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
-  color-scheme: dark;
-  --background: 30 44% 6%;
-  --foreground: 41 37% 88%;
-  --card: 24 31% 10%;
-  --card-foreground: 41 37% 88%;
-  --popover: 24 31% 10%;
-  --popover-foreground: 41 37% 88%;
-  --primary: 31 73% 56%;
-  --primary-foreground: 30 44% 6%;
-  --secondary: 24 31% 13%;
-  --secondary-foreground: 41 37% 88%;
-  --muted: 24 31% 13%;
-  --muted-foreground: 34 16% 64%;
-  --accent: 24 31% 14%;
-  --accent-foreground: 41 37% 88%;
-  --destructive: 5 100% 62%;
-  --destructive-foreground: 30 44% 6%;
-  --border: 32 16% 18%;
-  --input: 32 16% 26%;
-  --ring: 31 73% 56%;
-  --radius: 0;
-  --sidebar-background: 30 44% 5%;
-  --sidebar-foreground: 34 16% 64%;
-  --sidebar-primary: 31 73% 56%;
-  --sidebar-primary-foreground: 30 44% 6%;
-  --sidebar-accent: 24 31% 12%;
-  --sidebar-accent-foreground: 41 37% 88%;
-  --sidebar-border: 32 16% 18%;
-  --sidebar-ring: 31 73% 56%;
+  /* Lock shop: galvanized pegboard, white tiles, anodized padlock colours.
+     One light palette regardless of OS theme. */
+  --sp-canvas: #e4e7eb;
+  --sp-peg: #c9ced5;
+  --sp-panel: #ffffff;
+  --sp-ink: #0f1011;
+  --sp-muted: #5b6169;
+  --sp-line: #d3d7dd;
+  --sp-wash: #eef0f3;
+  --sp-lock: #2b59d9;
+  --sp-item: #d99500;
+  --sp-clue: #7b49d6;
+  --sp-exit: #0f1011;
+  --sp-stuck: #e0321f;
+  --sp-escaped: #16834f;
+  --sp-e1: 0 1px 0 rgba(15, 16, 17, 0.06), 0 1px 3px rgba(15, 16, 17, 0.1);
+  --sp-e2: 0 16px 40px rgba(15, 16, 17, 0.18), 0 2px 6px rgba(15, 16, 17, 0.08);
+  --sp-radius: 10px;
+  --sp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --sp-font: "Archivo Variable", "Archivo", "Helvetica Neue", sans-serif;
+  color-scheme: light;
+  --background: 214 15% 91%;
+  --foreground: 210 6% 6%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 6% 6%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 6% 6%;
+  --primary: 210 6% 6%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 216 17% 94%;
+  --secondary-foreground: 210 6% 6%;
+  --muted: 216 17% 94%;
+  --muted-foreground: 214 7% 38%;
+  --accent: 216 17% 94%;
+  --accent-foreground: 210 6% 6%;
+  --destructive: 6 76% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 216 13% 85%;
+  --input: 215 13% 81%;
+  --ring: 224 70% 51%;
+  --radius: 0.625rem;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 214 7% 38%;
+  --sidebar-primary: 210 6% 6%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 216 17% 94%;
+  --sidebar-accent-foreground: 210 6% 6%;
+  --sidebar-border: 216 13% 85%;
+  --sidebar-ring: 224 70% 51%;
+  /* Agent chat in the same tokens. */
+  --agent-kit-text: var(--sp-ink);
+  --agent-kit-muted-text: var(--sp-muted);
+  --agent-kit-accent: var(--sp-ink);
+  --agent-kit-accent-text: #ffffff;
+  --agent-kit-border: var(--sp-line);
+  --agent-kit-raised-surface: var(--sp-panel);
+  --agent-kit-subtle-surface: var(--sp-wash);
+  --agent-kit-recessed-surface: var(--sp-panel);
+  --agent-kit-danger: var(--sp-stuck);
+  --agent-kit-success: var(--sp-escaped);
+  --agent-kit-focus: var(--sp-lock);
+  --agent-kit-composer-elevation: var(--sp-e1);
+  --agent-kit-composer-border-color: var(--sp-line);
+  --agent-kit-composer-focus-border-color: var(--sp-ink);
   --chat-sidebar-width: 17.5rem;
   --chat-sidebar-content-inset: 0.5rem;
   --chat-sidebar-row-padding: 0.75rem;
@@ -251,8 +269,10 @@
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-family: var(--db-font-ui);
+    font-family: var(--sp-font);
     font-size: 16px;
+    font-weight: 450;
+    font-variant-numeric: tabular-nums;
   }
 }
 
