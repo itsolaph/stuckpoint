@@ -49,6 +49,20 @@ The agent uses OpenRouter (`@openrouter/ai-sdk-provider`). Put
 `server/plugins/agent-native-email-branding.ts` and overridable with
 `AGENT_MODEL` or the app settings. Data lives in local PGlite in development.
 
+## Demo
+
+Start from a clean slate before recording:
+
+```bash
+# stop the dev server first (local PGlite allows one process at a time)
+pnpm script reset-demo-data     # or: npx tsx scripts/reset-demo-data.ts
+pnpm dev --port 4313
+```
+
+The script clears rooms, nodes, playthroughs, hint ladders, GM sheets and chat
+threads from the local database and seeds nothing. Load the sample rooms from
+`/home` ("Load sample"). Tests never depend on it.
+
 ## The engine
 
 `src/engine/` is pure TypeScript: no React, no I/O, no LLM. `playtest(nodes)`
