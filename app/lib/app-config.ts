@@ -1,5 +1,7 @@
+import { PRODUCT_NAME } from "../brand";
+
 const rawAppName = "deadbolt";
-const rawAppTitle = "Deadbolt";
+const rawAppTitle: string = PRODUCT_NAME;
 
 const APP_NAME_PLACEHOLDER = "{" + "{APP_NAME}}";
 const APP_TITLE_PLACEHOLDER = "{" + "{APP_TITLE}}";

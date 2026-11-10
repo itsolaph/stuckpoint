@@ -5,6 +5,7 @@ import {
 } from "@agent-native/core/server";
 
 import actionsRegistry from "../../.generated/actions-registry.js";
+import { PRODUCT_NAME } from "../../app/brand.js";
 import { proofGate } from "../lib/proof-gate.js";
 
 const INITIAL_TOOL_NAMES = [
@@ -33,7 +34,7 @@ export default createAgentChatPlugin({
   resolveOrgId: async (event) => (await getOrgContext(event)).orgId,
   // Proof gate: a deterministic check on every final answer (see server/lib/proof-gate.ts).
   finalResponseGuard: proofGate,
-  systemPrompt: `You are Deadbolt's playtest co-designer: you and one escape-room designer share a live puzzle canvas. The designer draws the room or pastes a description; a deterministic walker (run-playtest) plays it like a player and finds deadlocks. You never play the room in your head: the walker is the judge.
+  systemPrompt: `You are ${PRODUCT_NAME}'s playtest co-designer: you and one escape-room designer share a live puzzle canvas. The designer draws the room or pastes a description; a deterministic walker (run-playtest) plays it like a player and finds deadlocks. You never play the room in your head: the walker is the judge.
 
 Nodes are item, clue, lock and exit. A node sits inside a lock (containerId) and/or needs other nodes (requires). A lock opens when all its requires are met and then reveals what is inside it; the exit ends the game; a singleUse item is consumed when used. A clue or item can itself require a tool (a UV-ink clue requires the UV flashlight).
 

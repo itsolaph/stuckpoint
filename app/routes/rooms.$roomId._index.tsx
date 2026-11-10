@@ -1,9 +1,10 @@
 import { useParams } from "react-router";
 
+import { PRODUCT_NAME } from "@/brand";
 import { RoomScreen } from "@/components/rooms/RoomScreen";
 
 export function meta() {
-  return [{ title: "Room - Deadbolt" }];
+  return [{ title: `Room - ${PRODUCT_NAME}` }];
 }
 
 export default function RoomRoute() {

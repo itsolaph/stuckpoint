@@ -1,10 +1,11 @@
 import { useSetPageTitle } from "@agent-native/toolkit/app-shell/header-actions";
 
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from "@/brand";
 import { RoomsHome } from "@/components/rooms/RoomsHome";
 
 export function meta() {
   return [
-    { title: "Deadbolt - escape-room playtester" },
+    { title: `${PRODUCT_NAME} - ${PRODUCT_TAGLINE}` },
     {
       name: "description",
       content:

@@ -1,9 +1,11 @@
 import { defineAppConfig } from "@agent-native/core/server";
 
+import { PRODUCT_NAME } from "../../app/brand.js";
+
 export default defineAppConfig({
   app: {
     // This name appears in transactional emails. Change it to your product name.
-    name: "Deadbolt",
+    name: PRODUCT_NAME,
     // The source template keeps a renamed app from inheriting first-party email branding.
     sourceTemplate: "chat",
     // Sign-in lands on the room list.
